@@ -11,17 +11,43 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import Toast from "@/components/shared/Toast";
+import { useState } from "react";
 
-export default function AddPost({
-  action,
-}: Readonly<{ action: (formData: FormData) => void }>) {
+type AddPostProps = {
+  action: (
+    formData: FormData
+  ) => Promise<{ status: string; text: string } | undefined>;
+};
+
+type ToastProps = {
+  status: string;
+  text: string;
+};
+
+export default function AddPost({ action }: Readonly<AddPostProps>) {
+  const [toast, setToast] = useState<ToastProps | null>(null);
+
   const handleSubmit = async (formData: FormData) => {
     const result = await action(formData);
-    console.log(result);
+
+    if (result) {
+      setToast(result);
+      if (result.status === "success") {
+        const dialog = document.querySelector("[data-state='open']");
+        if (dialog) {
+          (dialog as HTMLElement).click();
+        }
+      }
+    }
   };
 
   return (
     <div>
+      {toast !== null && (
+        <Toast message={toast.text} status={toast.status} position="top" />
+      )}
+
       <Dialog>
         <DialogTrigger asChild>
           <Button className="cursor-pointer">Add Snippet</Button>

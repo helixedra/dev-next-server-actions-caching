@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
-const db = new Database("database.db", { verbose: console.log });
+
+const db = new Database("database.db");
 db.exec(`
     CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,9 +18,13 @@ export function createPost(data: { title: string; content: string }) {
   return stmt.run(data.title, data.content);
 }
 
-export function getPosts() {
-  const stmt = db.prepare("SELECT * FROM posts ORDER BY id DESC");
-  return stmt.all();
+export async function getPosts() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const stmt = db.prepare("SELECT * FROM posts ORDER BY id DESC");
+      resolve(stmt.all());
+    }, 500); //remove this timeout
+  });
 }
 
 export function deletePost(id: number) {
